@@ -6,9 +6,13 @@
     "start": "next start"
   },
   "dependencies": {
+    "@noble/secp256k1": "^1.6.3",
+    "@rainbow-me/rainbowkit": "^0.5.0",
+    "ethers": "^5.7.0",
     "next": "latest",
     "react": "18.1.0",
-    "react-dom": "18.1.0"
+    "react-dom": "18.1.0",
+    "wagmi": "^0.6.4"
   },
   "devDependencies": {
     "@types/node": "17.0.35",
