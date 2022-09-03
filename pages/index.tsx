@@ -1,9 +1,7 @@
-// import type { NextPage } from "next";
-// import Head from "next/head";
-// import Image from "next/image";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useSignMessage, useAccount } from "wagmi";
 import { useState, useEffect } from "react";
+import List from "../components/List";
 import * as secp from "@noble/secp256k1";
 
 interface EventInterface {
@@ -50,6 +48,7 @@ export default function Home() {
   const [nostrPrivkey, setNostrPrivkey] = useState("");
   const [pubkeyHex, setPubkeyHex] = useState("");
   const [delegateId, setDelegateId] = useState("");
+  const [text, setText] = useState("");
 
   let ethAddress: string | undefined;
   const { address } = useAccount();
@@ -89,7 +88,6 @@ export default function Home() {
       const delegateWithSig = { delegate: delegateJSON, sig: data };
 
       console.log(JSON.stringify(delegateWithSig));
-      console.log(nostrPrivkey);
       localStorage.setItem("nostrPrivkey", nostrPrivkey);
 
       createEvent(
@@ -104,29 +102,45 @@ export default function Home() {
   }, [isSuccess]);
 
   async function createNostrEventWithDelegate() {
-    const delegatedEvent = await createEvent(
-      "Event made with Ethereum address",
-      nostrPrivkey,
-      pubkeyHex,
-      ["delegateId", delegateId]
-    );
+    const delegatedEvent = await createEvent(text, nostrPrivkey, pubkeyHex, [
+      "delegateId",
+      delegateId,
+    ]);
 
     console.log(JSON.stringify(delegatedEvent));
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL
+      }/lpush/wagmi_nostr/${JSON.stringify(delegatedEvent)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_TOKEN}`,
+        },
+      }
+    );
+    console.log(response)
   }
 
   return (
-    <div>
-      <ConnectButton></ConnectButton>
-      <button disabled={isLoading} onClick={() => signMessage()}>
-        Sign message
-      </button>
-      {isSuccess && <div>Signature: {data}</div>}
-      {isError && <div>Error signing message</div>}
-      <p>{`priv: ${nostrPrivkey}`}</p>
-      <p>{`pub: ${pubkeyHex}`}</p>
-      <button onClick={() => createNostrEventWithDelegate()}>
-        Create Nostr with delegate
-      </button>
+    <div className="flex flex-col items-center mx-auto max-w-md py-3">
+      <div className="mb-10">
+        <ConnectButton></ConnectButton>
+      </div>
+      <div className="flex w-full mb-10">
+        <input
+          placeholder="Type something..."
+          type="text"
+          className="flex-1 focus:outline-none pr-5"
+          onChange={(e) => setText(e.target.value)}
+        />
+        <button
+          onClick={() => createNostrEventWithDelegate()}
+          className="bg-neutral-900 text-neutral-50 py-1.5 px-3 rounded-xl drop-shadow-xl focus:outline-none hover:scale-105 transition"
+        >
+          send
+        </button>
+      </div>
+      <List />
     </div>
   );
 }
