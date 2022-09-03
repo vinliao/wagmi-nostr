@@ -51,7 +51,7 @@ export default function Home() {
   const [text, setText] = useState("");
 
   let ethAddress: string | undefined;
-  const { address } = useAccount();
+  const { address, isDisconnected } = useAccount();
   ethAddress = address;
 
   const delegateMessage = JSON.stringify({
@@ -84,7 +84,6 @@ export default function Home() {
   // on sig success
   useEffect(() => {
     if (isSuccess) {
-      console.log("yoo what is up");
       const delegateJSON = JSON.parse(delegateMessage);
       const delegateWithSig = { delegate: delegateJSON, sig: data };
 
@@ -109,11 +108,10 @@ export default function Home() {
       delegateId,
     ]);
 
-    console.log(JSON.stringify(delegatedEvent));
+    // dumping json is problematic on redis lmao
+    const base64DelegatedEvent = window.btoa(JSON.stringify(delegatedEvent));
     const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL
-      }/lpush/wagmi_nostr/${JSON.stringify(delegatedEvent)}`,
+      `${process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL}/lpush/wagmi_nostr/${base64DelegatedEvent}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_TOKEN}`,
@@ -121,10 +119,11 @@ export default function Home() {
       }
     );
     console.log(response);
+    setText("")
   }
 
   return (
-    <div className="flex flex-col items-center mx-auto max-w-md py-3">
+    <div className="flex flex-col items-center mx-auto max-w-md py-3 px-2">
       <div className="mb-10">
         <ConnectButton></ConnectButton>
       </div>
@@ -133,26 +132,28 @@ export default function Home() {
           <input
             placeholder="Type something..."
             type="text"
-            className="flex-1 focus:outline-none pr-5"
+            className="flex-1 focus:outline-none pr-5 bg-slate-50"
             onChange={(e) => setText(e.target.value)}
+            value={text}
           />
         )}
 
         {/* if no delegate, sign button */}
         {/* if delegate exist, send button */}
-        {delegateId == "" && (
+        {delegateId == "" && !isDisconnected && (
           <button
-            className="bg-neutral-900 text-neutral-50 py-1.5 px-3 rounded-xl drop-shadow-xl focus:outline-none hover:scale-[1.03] active:scale-[0.97] transition"
+            className="bg-slate-900 text-slate-50 py-1.5 px-3 rounded-xl drop-shadow-xl focus:outline-none hover:scale-105 active:scale-95 transition"
             disabled={isLoading}
             onClick={() => signMessage()}
           >
             sign delegate
           </button>
         )}
+
         {delegateId != "" && (
           <button
             onClick={() => createNostrEventWithDelegate()}
-            className="bg-neutral-900 text-neutral-50 py-1.5 px-3 rounded-xl drop-shadow-xl focus:outline-none hover:scale-[1.03] active:scale-[0.97] transition"
+            className="bg-slate-900 text-slate-50 py-1.5 px-3 rounded-xl drop-shadow-xl focus:outline-none hover:scale-105 active:scale-95 transition"
           >
             send
           </button>

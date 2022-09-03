@@ -9,9 +9,12 @@ export default function List() {
       },
     }).then((res) => res.json());
 
-  const { data, error } = useSWR(
-    `${process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL}/lrange/wagmi_nostr/1/-1`,
-    fetcher
+  const {
+    data,
+    error,
+  } = useSWR(
+    `${process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL}/lrange/wagmi_nostr/0/-1`,
+    fetcher, {refreshInterval: 1000}
   );
 
   if (error) return <div className="text-red-600">loading event failed!</div>;
@@ -24,34 +27,33 @@ export default function List() {
           viewBox="0 0 24 24"
           strokeWidth={1.5}
           stroke="currentColor"
-          className="w-6 h-6 text-neutral-900 animate-spin"
+          className="w-6 h-6 text-slate-900 animate-spin"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
         </svg>
       </div>
     );
 
-  console.log(data);
   // render data
   return (
     <div className="w-full">
       {data.result.map((event: any) => {
         try {
-          const jsonEvent = JSON.parse(event);
+          const rawEvent = window.atob(event);
+          const jsonEvent = JSON.parse(rawEvent);
           return (
-            <div className="mb-5">
+            <div className="mb-5" key={jsonEvent.id}>
               <div className="flex justify-between">
-                <span className="text-neutral-800 font-semibold">
+                <span className="text-slate-800 font-semibold">
                   {jsonEvent.pubkey.slice(0, 5) +
                     "..." +
                     jsonEvent.pubkey.slice(-5)}
                 </span>
-                {/* <span className="text-stone-400">{format(time * 1000)}</span> */}
-                <span className="text-neutral-400">
+                <span className="text-slate-400">
                   {format(jsonEvent.created_at * 1000)}
                 </span>
               </div>
-              <p className="break-words text-neutral-500 mb-1">
+              <p className="break-words text-slate-500 mb-1">
                 {jsonEvent.content}
               </p>
             </div>
