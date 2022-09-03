@@ -1,4 +1,5 @@
 import useSWR from "swr";
+import { format } from "timeago.js";
 
 export default function List() {
   const fetcher = (url: string) =>
@@ -13,8 +14,22 @@ export default function List() {
     fetcher
   );
 
-  if (error) return <div>failed to load</div>;
-  if (!data) return <div>loading...</div>;
+  if (error) return <div className="text-red-600">loading event failed!</div>;
+  if (!data)
+    return (
+      <div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-6 h-6 text-neutral-900 animate-spin"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
+        </svg>
+      </div>
+    );
 
   console.log(data);
   // render data
@@ -26,13 +41,15 @@ export default function List() {
           return (
             <div className="mb-5">
               <div className="flex justify-between">
-                <span className="text-black font-semibold">
+                <span className="text-neutral-800 font-semibold">
                   {jsonEvent.pubkey.slice(0, 5) +
                     "..." +
                     jsonEvent.pubkey.slice(-5)}
                 </span>
                 {/* <span className="text-stone-400">{format(time * 1000)}</span> */}
-                <span className="text-neutral-400">somet ime</span>
+                <span className="text-neutral-400">
+                  {format(jsonEvent.created_at * 1000)}
+                </span>
               </div>
               <p className="break-words text-neutral-500 mb-1">
                 {jsonEvent.content}

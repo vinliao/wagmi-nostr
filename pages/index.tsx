@@ -84,6 +84,7 @@ export default function Home() {
   // on sig success
   useEffect(() => {
     if (isSuccess) {
+      console.log("yoo what is up");
       const delegateJSON = JSON.parse(delegateMessage);
       const delegateWithSig = { delegate: delegateJSON, sig: data };
 
@@ -95,6 +96,7 @@ export default function Home() {
         nostrPrivkey,
         pubkeyHex
       ).then((event) => {
+        setDelegateId(event.id); // to trigger render
         localStorage.setItem("delegateId", event.id);
         localStorage.setItem("delegateEvent", JSON.stringify(event));
       });
@@ -118,7 +120,7 @@ export default function Home() {
         },
       }
     );
-    console.log(response)
+    console.log(response);
   }
 
   return (
@@ -126,19 +128,35 @@ export default function Home() {
       <div className="mb-10">
         <ConnectButton></ConnectButton>
       </div>
-      <div className="flex w-full mb-10">
-        <input
-          placeholder="Type something..."
-          type="text"
-          className="flex-1 focus:outline-none pr-5"
-          onChange={(e) => setText(e.target.value)}
-        />
-        <button
-          onClick={() => createNostrEventWithDelegate()}
-          className="bg-neutral-900 text-neutral-50 py-1.5 px-3 rounded-xl drop-shadow-xl focus:outline-none hover:scale-105 transition"
-        >
-          send
-        </button>
+      <div className="flex w-full mb-10 justify-center">
+        {delegateId != "" && (
+          <input
+            placeholder="Type something..."
+            type="text"
+            className="flex-1 focus:outline-none pr-5"
+            onChange={(e) => setText(e.target.value)}
+          />
+        )}
+
+        {/* if no delegate, sign button */}
+        {/* if delegate exist, send button */}
+        {delegateId == "" && (
+          <button
+            className="bg-neutral-900 text-neutral-50 py-1.5 px-3 rounded-xl drop-shadow-xl focus:outline-none hover:scale-[1.03] active:scale-[0.97] transition"
+            disabled={isLoading}
+            onClick={() => signMessage()}
+          >
+            sign delegate
+          </button>
+        )}
+        {delegateId != "" && (
+          <button
+            onClick={() => createNostrEventWithDelegate()}
+            className="bg-neutral-900 text-neutral-50 py-1.5 px-3 rounded-xl drop-shadow-xl focus:outline-none hover:scale-[1.03] active:scale-[0.97] transition"
+          >
+            send
+          </button>
+        )}
       </div>
       <List />
     </div>
