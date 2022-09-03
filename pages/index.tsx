@@ -49,9 +49,11 @@ export default function Home() {
   const [pubkeyHex, setPubkeyHex] = useState("");
   const [delegateId, setDelegateId] = useState("");
   const [text, setText] = useState("");
+  const [delegateModal, setDelegateModal] = useState(false);
+  const [delegateEvent, setDelegateEvent] = useState({});
 
   let ethAddress: string | undefined;
-  const { address, isDisconnected } = useAccount();
+  const { address, status } = useAccount();
   ethAddress = address;
 
   const delegateMessage = JSON.stringify({
@@ -78,6 +80,7 @@ export default function Home() {
       setPubkeyHex(secp.utils.bytesToHex(pubkey));
 
       setDelegateId(localStorage.getItem("delegateId")!);
+      setDelegateEvent(JSON.parse(localStorage.getItem("delegateEvent")!));
     }
   }, []);
 
@@ -99,6 +102,8 @@ export default function Home() {
         localStorage.setItem("delegateId", event.id);
         localStorage.setItem("delegateEvent", JSON.stringify(event));
       });
+
+      setDelegateModal(true);
     }
   }, [isSuccess]);
 
@@ -118,8 +123,13 @@ export default function Home() {
         },
       }
     );
-    console.log(response);
-    setText("")
+    setText("");
+    console.log("\n\n\n\n\n");
+    console.log("DELEGATE EVENT:");
+    console.log(delegateEvent);
+    console.log("\n\n\n\n\n");
+    console.log("EVENT WITH DELEGATED KEYS:");
+    console.log(delegatedEvent);
   }
 
   return (
@@ -140,7 +150,7 @@ export default function Home() {
 
         {/* if no delegate, sign button */}
         {/* if delegate exist, send button */}
-        {delegateId == "" && !isDisconnected && (
+        {status == "connected" && delegateId == "" && (
           <button
             className="bg-slate-900 text-slate-50 py-1.5 px-3 rounded-xl drop-shadow-xl focus:outline-none hover:scale-105 active:scale-95 transition"
             disabled={isLoading}
@@ -160,6 +170,7 @@ export default function Home() {
         )}
       </div>
       <List />
+      <p className="text-slate-400 text-sm">open console to inspect event</p>
     </div>
   );
 }

@@ -42,7 +42,7 @@ export default function List() {
           const rawEvent = window.atob(event);
           const jsonEvent = JSON.parse(rawEvent);
           return (
-            <div className="mb-5" key={jsonEvent.id}>
+            <div key={jsonEvent.id}>
               <div className="flex justify-between">
                 <span className="text-slate-800 font-semibold">
                   {jsonEvent.pubkey.slice(0, 5) +
@@ -56,6 +56,7 @@ export default function List() {
               <p className="break-words text-slate-500 mb-1">
                 {jsonEvent.content}
               </p>
+              <div className="py-2 text-center text-slate-400">···</div>
             </div>
           );
         } catch {
