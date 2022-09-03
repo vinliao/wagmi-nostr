@@ -170,7 +170,7 @@ export default function Home() {
         )}
       </div>
       <List />
-      <p className="text-slate-400 text-sm">open console to inspect event</p>
+      <p className="text-slate-400 text-sm mt-5">open console to inspect event</p>
     </div>
   );
 }
